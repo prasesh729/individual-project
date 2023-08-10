@@ -1,0 +1,1 @@
+[{"model": "server.account", "pk": 1, "fields": {"role": 30, "profile": 1, "user": 1, "archive": false}}, {"model": "server.account", "pk": 2, "fields": {"role": 10, "profile": 2, "user": 2, "archive": false}}, {"model": "server.account", "pk": 3, "fields": {"role": 20, "profile": 3, "user": 3, "archive": false}}]

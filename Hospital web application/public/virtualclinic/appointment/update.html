@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load app_filters %}
+{% block title %}
+    Update Appointment
+{% endblock %}
+{% block sidebar_appointment %}
+    active
+{% endblock %}
+{% block body_header %}
+    Update Appointment
+{% endblock %}
+{% block body %}
+    {% if appointment.status == "Active" %}
+        <p class="lead">Make changes to the appointment and click '{{ form_button }}' when finished.</p>
+        
+        <div class="container row mb-4" >
+            <div class="col-md-6">
+                <h5>Enter symptoms and based on that, diseases can be listed.</h5>
+                <form id="openai-form" class="mb-3">
+                    <textarea class="form-control" rows="5" id="question" name="question"></textarea>
+                    <button type="submit" class="btn btn-primary mt-3 w-100">
+                        Submit the symptoms, Find possible diseases
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h5>Possible Diseases you might have.</h5>
+                <div id="openai-output"></div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            {% include "singleform.html" %}
+        </div>
+    {% else %}
+         <p class="lead">The requested appointment is no longer active.</p>
+        <div class="col-sm-3">
+            <a href="/appointment/list/" class="btn btn-primary btn-block" role="button">Return to appointment list</a>
+        </div>
+    {% endif %}
+
+    
+<script>
+    // Handle OpenAI form submission
+    const openaiForm = document.getElementById('openai-form');
+    const openaiOutput = document.getElementById('openai-output');
+
+    openaiForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const question = document.getElementById('question').value;
+        const formData = new FormData();
+        formData.append('question', question);
+        const aiPromt = `Strictly list 'No introduction, No other description, no bullshit' just list 10 diseases that can be caused by ${question}}`
+
+        fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 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',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages: [
+                    { role: 'system', content: 'You are a helpful assistant.' },
+                    { role: 'user', content: aiPromt }
+                ],
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                const assistantResponse = data.choices[0].message.content;
+                openaiOutput.innerHTML = assistantResponse;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+
+</script>
+{% endblock %}
